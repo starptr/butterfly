@@ -7,3 +7,7 @@ WORKERS_RS_VERSION = "0.0.11"
 
 [build]
 command = "cargo install -q worker-build --version 0.0.7 && worker-build --release"
+
+kv_namespaces = [
+  { binding = "KV_FROM_RUST", id = "011796db228b472d8deb90f0195c3432", preview_id = "03d4b412c09d4ae0b21c664faa491943" },
+]
