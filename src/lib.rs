@@ -13,6 +13,26 @@ fn log_request(req: &Request) {
     );
 }
 
+macro_rules! attach_get_common_permanent_redirect {
+    ($router:expr, $slug:expr, $target:expr) => {
+        {
+            $router.get($slug, |_, _| {
+                Response::redirect_with_status(Url::parse($target).unwrap(), 301)
+            })
+        }
+    };
+}
+//fn attach_get_common_permanent_redirect<'a, D>(router: Router<'a, D>, slug: &str, target: &str) -> worker::Router<'a, D> {
+//    macro_rules! splice_target {
+//        () => {
+//        };
+//    };
+//
+//    router.get(slug, |_, _| {
+//        Response::redirect_with_status(Url::parse(target).unwrap(), 301)
+//    })
+//}
+
 #[event(fetch)]
 pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Response> {
     log_request(&req);
@@ -28,6 +48,13 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
     // Add as many routes as your Worker needs! Each route will get a `Request` for handling HTTP
     // functionality and a `RouteContext` which you can use to  and get route parameters and
     // Environment bindings like KV Stores, Durable Objects, Secrets, and Variables.
+    let router = attach_get_common_permanent_redirect!(router, "/tiktok", "https://tiktok.com/@really_yuto");
+    let router = attach_get_common_permanent_redirect!(router, "/twitter", "https://twitter.com/really_yuto");
+    let router = attach_get_common_permanent_redirect!(router, "/instagram", "https://instagram.com/really_yuto/");
+    let router = attach_get_common_permanent_redirect!(router, "/ig", "https://instagram.com/really_yuto/");
+    let router = attach_get_common_permanent_redirect!(router, "/linkedin", "https://linkedin.com/in/yuton/");
+    let router = attach_get_common_permanent_redirect!(router, "/facebook", "https://facebook.com/yuto314/");
+    let router = attach_get_common_permanent_redirect!(router, "/fb", "https://facebook.com/yuto314/");
     router
         .get("/", |_, _| Response::ok("Hello from Workers!"))
         .post_async("/form/:field", |mut req, ctx| async move {
