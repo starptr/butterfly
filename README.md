@@ -1,3 +1,18 @@
+# butterfly
+
+A fast link-shortener with hardcoded optimizations, using Cloudflare Workers.
+
+## Terraform
+
+Currently, the cloudflare provider for terraform is unable to take multiple files as input. Since building this project generates both a `shim.mjs` and an `index.wasm` file,
+terraform cannot deploy it yet.
+
+## Deployment
+
+Using wrangler we can deploy this project easily. See the Usage section below.
+
+---
+
 # Template: worker-rust
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/worker-rust)
