@@ -45,3 +45,4 @@ terraform.rc
 
 # Ignore wrangle secrets
 secret.json
+.dev.vars

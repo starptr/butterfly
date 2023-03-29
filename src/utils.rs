@@ -16,7 +16,7 @@ cfg_if! {
 
 const ALPHABET: [char; 33] = const_str::to_char_array!("0123456789abcdefghjkmnpqrstuvwxyz");
 
-fn generate_random_slug(seed: &str) -> String {
+pub fn generate_random_slug() -> String {
     let mut rng = rand::thread_rng();
     (0..6).map(|_| {
         ALPHABET[rng.gen_range(0..ALPHABET.len())]
@@ -24,12 +24,12 @@ fn generate_random_slug(seed: &str) -> String {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct PostAddBody {
+pub struct PostAddRequestBody {
     target: String,
     token: String,
 }
 
-impl PostAddBody {
+impl PostAddRequestBody {
     pub fn get_token(&self) -> &str {
         &self.token
     }

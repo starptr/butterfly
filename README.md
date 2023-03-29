@@ -13,6 +13,16 @@ variable with the following instructions:
 that you will need to provide to write to the KV database.
 3. Run `npx wrangler secret:bulk secret.json` to upload the secret to the worker.
 
+### Local Development
+
+For local development to have access to secrets, you need to define secrets in `.dev.vars` like so:
+
+```
+BUTTERFLY_API_TOKEN = "mytoken"
+```
+
+This file needs to be manually updated to be kept in sync with `secret.json`.
+
 ## API Specification
 
 ### `GET /:slug`
@@ -20,7 +30,17 @@ Client will receieve status 301 (permanent redirect) to the expanded URL.
 Hardcoded redirects also fall under this method, such as those for social media
 profiles.
 
-### `POST`
+### `POST /add`
+This method requires a json body with the following shape:
+
+```
+{
+	"target": "www.example.com/url-to-shorten",
+	"token": "same_token_defined_as_secret"
+}
+```
+
+and will generate a short url given in `target`.
 
 ## Terraform
 
