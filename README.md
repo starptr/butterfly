@@ -2,6 +2,26 @@
 
 A fast link-shortener with hardcoded optimizations, using Cloudflare Workers.
 
+## Secrets
+
+By design, only 1 user is allowed to write to the KV database. To ensure that
+only the authorized user may write, set the `BUTTERFLY_API_TOKEN` environment
+variable with the following instructions:
+
+1. Create a file called `secret.json` at the root of the repository.
+2. Define a json object and assign a password to the key. This is the token
+that you will need to provide to write to the KV database.
+3. Run `npx wrangler secret:bulk secret.json` to upload the secret to the worker.
+
+## API Specification
+
+### `GET /:slug`
+Client will receieve status 301 (permanent redirect) to the expanded URL.
+Hardcoded redirects also fall under this method, such as those for social media
+profiles.
+
+### `POST`
+
 ## Terraform
 
 Currently, the cloudflare provider for terraform is unable to take multiple files as input. Since building this project generates both a `shim.mjs` and an `index.wasm` file,

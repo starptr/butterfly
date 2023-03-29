@@ -1,4 +1,5 @@
 use cfg_if::cfg_if;
+use serde::{Deserialize, Serialize};
 
 cfg_if! {
     // https://github.com/rustwasm/console_error_panic_hook#readme
@@ -8,5 +9,21 @@ cfg_if! {
     } else {
         #[inline]
         pub fn set_panic_hook() {}
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PostAddBody {
+    target: String,
+    token: String,
+}
+
+impl PostAddBody {
+    pub fn get_token(&self) -> &str {
+        &self.token
+    }
+
+    pub fn get_target(&self) -> &str {
+        &self.target
     }
 }

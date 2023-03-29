@@ -42,3 +42,6 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Ignore wrangle secrets
+secret.json

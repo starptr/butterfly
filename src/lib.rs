@@ -1,5 +1,5 @@
 use serde_json::json;
-use worker::*;
+use worker::{*, wasm_bindgen::JsValue};
 
 mod utils;
 
@@ -72,6 +72,34 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
             }
 
             Response::error("Bad Request", 400)
+        })
+        .post_async("/add", |mut req, ctx| async move {
+            match req.json::<utils::PostAddBody>().await {
+                Ok(json) => {
+                    let token = json.get_token();
+                    let expected_key = ctx.env.secret("BUTTERFLY_API_TOKEN");
+                    if expected_key.is_err() {
+                        return Response::error("Correct API key is not defined", 500);
+                    }
+                    let expected_key = expected_key.unwrap();
+                    let expected_key: JsValue = expected_key.into();
+                    let expected_key: Option<String> = expected_key.as_string();
+                    if expected_key.is_none() {
+                        return Response::error("API key cannot be parsed into string", 500);
+                    }
+                    let expected_key = expected_key.unwrap();
+                    if token != expected_key {
+                        return Response::error("Unauthorized", 401);
+                    }
+
+                    let target = json.get_target();
+                    //let a: u32 = json["a"].as_u64().unwrap() as u32;
+                    //let b: u32 = json["b"].as_u64().unwrap() as u32;
+                    //Response::from_json(&json!({ "result": a + b }))
+                    Response::ok("yay")
+                },
+                Err(e) => Response::error(format!("Json parsing failed: {}", e), 400),
+            }
         })
         .get("/worker-version", |_, ctx| {
             let version = ctx.var("WORKERS_RS_VERSION")?.to_string();
