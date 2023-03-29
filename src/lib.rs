@@ -1,9 +1,7 @@
 use serde_json::json;
-use worker::*;
+use worker::{*, wasm_bindgen::JsValue};
 
 mod utils;
-
-const KV_FROM_RUST: &str = "KV_FROM_RUST";
 
 fn log_request(req: &Request) {
     console_log!(
@@ -24,6 +22,16 @@ macro_rules! attach_get_common_permanent_redirect {
         }
     };
 }
+//fn attach_get_common_permanent_redirect<'a, D>(router: Router<'a, D>, slug: &str, target: &str) -> worker::Router<'a, D> {
+//    macro_rules! splice_target {
+//        () => {
+//        };
+//    };
+//
+//    router.get(slug, |_, _| {
+//        Response::redirect_with_status(Url::parse(target).unwrap(), 301)
+//    })
+//}
 
 #[event(fetch)]
 pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Response> {
@@ -65,26 +73,32 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
 
             Response::error("Bad Request", 400)
         })
-        .post_async("/create", |mut req, ctx| async move {
-            match req.form_data().await {
-                Ok(form) => {
-                    //let target = form.get("target");
-                    //if let None = target {
-                    //    return Response::error("Missing target form value", 400);
-                    //}
-                    //let target = target.unwrap();
+        .post_async("/add", |mut req, ctx| async move {
+            match req.json::<utils::PostAddBody>().await {
+                Ok(json) => {
+                    let token = json.get_token();
+                    let expected_key = ctx.env.secret("BUTTERFLY_API_TOKEN");
+                    if expected_key.is_err() {
+                        return Response::error("Correct API key is not defined", 500);
+                    }
+                    let expected_key = expected_key.unwrap();
+                    let expected_key: JsValue = expected_key.into();
+                    let expected_key: Option<String> = expected_key.as_string();
+                    if expected_key.is_none() {
+                        return Response::error("API key cannot be parsed into string", 500);
+                    }
+                    let expected_key = expected_key.unwrap();
+                    if token != expected_key {
+                        return Response::error("Unauthorized", 401);
+                    }
 
-                    //let kv = ctx.kv(KV_FROM_RUST);
-                    //if let Err(e) = kv {
-                    //    return Response::error(format!("Failed to get KV: {}", e), 500);
-                    //}
-                    //let kv = kv.unwrap();
-                    //kv.put(slug, target).await?;
-                    Response::ok("ok")
-                }
-                Err(e) => {
-                    Response::error(format!("Missing form data: {}", e), 404)
-                }
+                    let target = json.get_target();
+                    //let a: u32 = json["a"].as_u64().unwrap() as u32;
+                    //let b: u32 = json["b"].as_u64().unwrap() as u32;
+                    //Response::from_json(&json!({ "result": a + b }))
+                    Response::ok("yay")
+                },
+                Err(e) => Response::error(format!("Json parsing failed: {}", e), 400),
             }
         })
         .get("/worker-version", |_, ctx| {

@@ -1,6 +1,7 @@
 use cfg_if::cfg_if;
 use const_str;
 use rand::Rng;
+use serde::{Deserialize, Serialize};
 
 cfg_if! {
     // https://github.com/rustwasm/console_error_panic_hook#readme
@@ -20,4 +21,20 @@ fn generate_random_slug(seed: &str) -> String {
     (0..6).map(|_| {
         ALPHABET[rng.gen_range(0..ALPHABET.len())]
     }).collect()
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PostAddBody {
+    target: String,
+    token: String,
+}
+
+impl PostAddBody {
+    pub fn get_token(&self) -> &str {
+        &self.token
+    }
+
+    pub fn get_target(&self) -> &str {
+        &self.target
+    }
 }
