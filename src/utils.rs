@@ -1,4 +1,6 @@
 use cfg_if::cfg_if;
+use const_str;
+use rand::Rng;
 
 cfg_if! {
     // https://github.com/rustwasm/console_error_panic_hook#readme
@@ -9,4 +11,13 @@ cfg_if! {
         #[inline]
         pub fn set_panic_hook() {}
     }
+}
+
+const ALPHABET: [char; 33] = const_str::to_char_array!("0123456789abcdefghjkmnpqrstuvwxyz");
+
+fn generate_random_slug(seed: &str) -> String {
+    let mut rng = rand::thread_rng();
+    (0..6).map(|_| {
+        ALPHABET[rng.gen_range(0..ALPHABET.len())]
+    }).collect()
 }

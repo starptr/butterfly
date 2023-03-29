@@ -3,6 +3,8 @@ use worker::*;
 
 mod utils;
 
+const KV_FROM_RUST: &str = "KV_FROM_RUST";
+
 fn log_request(req: &Request) {
     console_log!(
         "{} - [{}], located at: {:?}, within: {}",
@@ -22,16 +24,6 @@ macro_rules! attach_get_common_permanent_redirect {
         }
     };
 }
-//fn attach_get_common_permanent_redirect<'a, D>(router: Router<'a, D>, slug: &str, target: &str) -> worker::Router<'a, D> {
-//    macro_rules! splice_target {
-//        () => {
-//        };
-//    };
-//
-//    router.get(slug, |_, _| {
-//        Response::redirect_with_status(Url::parse(target).unwrap(), 301)
-//    })
-//}
 
 #[event(fetch)]
 pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Response> {
@@ -72,6 +64,28 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
             }
 
             Response::error("Bad Request", 400)
+        })
+        .post_async("/create", |mut req, ctx| async move {
+            match req.form_data().await {
+                Ok(form) => {
+                    //let target = form.get("target");
+                    //if let None = target {
+                    //    return Response::error("Missing target form value", 400);
+                    //}
+                    //let target = target.unwrap();
+
+                    //let kv = ctx.kv(KV_FROM_RUST);
+                    //if let Err(e) = kv {
+                    //    return Response::error(format!("Failed to get KV: {}", e), 500);
+                    //}
+                    //let kv = kv.unwrap();
+                    //kv.put(slug, target).await?;
+                    Response::ok("ok")
+                }
+                Err(e) => {
+                    Response::error(format!("Missing form data: {}", e), 404)
+                }
+            }
         })
         .get("/worker-version", |_, ctx| {
             let version = ctx.var("WORKERS_RS_VERSION")?.to_string();
