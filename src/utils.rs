@@ -92,7 +92,7 @@ impl<T> ToResultResponse<T> for worker::Result<T> {
  * The Ok result should not contain an error response, although it is possible to do so.
  * The Err result should contain an error Response, and no other kind of Response.
  */
-pub async fn handle_get_link<D>(mut req: Request, ctx: RouteContext<D>) -> Result<worker::Result<Response>, worker::Result<Response>> {
+pub async fn handle_post_link<D>(mut req: Request, ctx: RouteContext<D>) -> Result<worker::Result<Response>, worker::Result<Response>> {
     //let slug = ctx.param("slug").ok_or(Response::error("bad request", 400))?;
     let json = req.json::<PostAddRequestBody>().await.from_with("Json parsing failed", 400)?;
     let token = json.get_token();

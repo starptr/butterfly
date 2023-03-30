@@ -73,44 +73,11 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
 
             Response::error("Bad Request", 400)
         })
-        .post_async("/add", |mut req, ctx| async move {
-            match req.json::<utils::PostAddRequestBody>().await {
-                Ok(json) => {
-                    let token = json.get_token();
-                    let expected_key = ctx.env.secret("BUTTERFLY_API_TOKEN");
-                    if expected_key.is_err() {
-                        return Response::error("correct API key is not defined", 500);
-                    }
-                    let expected_key = expected_key.unwrap();
-                    let expected_key: JsValue = expected_key.into();
-                    let expected_key: Option<String> = expected_key.as_string();
-                    if expected_key.is_none() {
-                        return Response::error("API key cannot be parsed into string", 500);
-                    }
-                    let expected_key = expected_key.unwrap();
-                    if token != expected_key {
-                        return Response::error("unauthorized", 401);
-                    }
-
-                    let target = json.get_target();
-                    let slug = utils::generate_random_slug();
-                    let kv = ctx.kv("KV_FROM_RUST");
-                    if kv.is_err() {
-                        return Response::error("failed to retrieve KV store", 500);
-                    }
-                    let kv = kv.unwrap();
-                    let put_builder = kv.put(&slug, target);
-                    if put_builder.is_err() {
-                        return Response::error(format!("failed to create KV store put builder: {}", put_builder.unwrap_err()), 500);
-                    }
-                    let put_builder = put_builder.unwrap();
-                    let put_result = put_builder.execute().await;
-                    if put_result.is_err() {
-                        return Response::error(format!("failed to put into KV store: {}", put_result.unwrap_err()), 500);
-                    }
-                    Response::ok(format!("your new url: https://yut.to/{}", slug))
-                },
-                Err(e) => Response::error(format!("Json parsing failed: {}", e), 400),
+        .post_async("/add", |req, ctx| async move {
+            let res = utils::handle_post_link(req, ctx);
+            match res.await {
+                Ok(res) => res,
+                Err(res) => res,
             }
         })
         .get_async("/:slug", |mut req, ctx| async move {
