@@ -2,7 +2,7 @@ use cfg_if::cfg_if;
 use const_str;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-use worker::{Request, RouteContext, Response, Secret};
+use worker::{Request, RouteContext, Response, Secret, wasm_bindgen::JsValue};
 
 cfg_if! {
     // https://github.com/rustwasm/console_error_panic_hook#readme
@@ -70,6 +70,12 @@ impl<'a> ToResultResponse<&'a str> for Option<&'a str> {
     }
 }
 
+impl ToResultResponse<String> for Option<String> {
+    fn from_with(self, err_msg: &str, status: u16) -> Result<String, worker::Result<Response>> {
+        self.ok_or(Response::error(err_msg, status))
+    }
+}
+
 impl<T, E> ToResultResponse<T> for Result<T, DisplayableError<E>> where E: std::fmt::Display {
     fn from_with(self, err_msg: &str, status: u16) -> Result<T, worker::Result<Response>> {
         self.map_err(|e| Response::error(format!("{}: {}", err_msg, e), status))
@@ -82,7 +88,30 @@ impl<T> ToResultResponse<T> for worker::Result<T> {
     }
 }
 
-pub async fn handle_get_link<D>(mut req: Request, ctx: RouteContext<D>) -> worker::Result<Response> {
+/*
+ * The Ok result should not contain an error response, although it is possible to do so.
+ * The Err result should contain an error Response, and no other kind of Response.
+ */
+pub async fn handle_get_link<D>(mut req: Request, ctx: RouteContext<D>) -> Result<worker::Result<Response>, worker::Result<Response>> {
     //let slug = ctx.param("slug").ok_or(Response::error("bad request", 400))?;
-    Response::ok("Hello from Workers!")
+    let json = req.json::<PostAddRequestBody>().await.from_with("Json parsing failed", 400)?;
+    let token = json.get_token();
+
+    let expected_key = ctx.env.secret("BUTTERFLY_API_TOKEN").from_with("correct API key is not defined", 500)?;
+    let expected_key: JsValue = expected_key.into();
+    let expected_key = expected_key.as_string().from_with("API key cannot be parsed into string", 500)?;
+    if token != expected_key {
+        return Err(Response::error("unauthorized", 401));
+    }
+
+    let target = json.get_target();
+    let slug = generate_random_slug();
+    let kv = ctx.kv("KV_FROM_RUST").from_with("failed to retrieve KV store", 500)?;
+    let put_builder = kv.put(&slug, target)
+        .map_err(|e| DisplayableError::from(e))
+        .from_with("failed to create KV store put builder", 500)?;
+    let _put_result = put_builder.execute().await
+        .map_err(|e| DisplayableError::from(e))
+        .from_with("failed to put into KV store", 500)?;
+    Ok(Response::ok(format!("your new url: https://yut.to/{}", slug)))
 }
