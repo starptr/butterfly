@@ -144,10 +144,6 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
             }
             Response::error("Bad Request", 400)
         })
-        //.get("/worker-version", |_, ctx| {
-        //    let version = ctx.var("WORKERS_RS_VERSION")?.to_string();
-        //    Response::ok(version)
-        //})
         .run(req, env)
         .await
 }
