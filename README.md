@@ -40,7 +40,15 @@ This method requires a json body with the following shape:
 }
 ```
 
-and will generate a short url given in `target`.
+and will generate a short url of the url given in `target`. On success, the
+response has the following shape:
+
+```
+{
+	"slug": "slug of short url",
+	"url": "full short url"
+}
+```
 
 ## Terraform
 
