@@ -56,23 +56,7 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
     //let router = attach_get_common_permanent_redirect!(router, "/facebook", "https://facebook.com/yuto314/");
     //let router = attach_get_common_permanent_redirect!(router, "/fb", "https://facebook.com/yuto314/");
     router
-        //.get("/", |_, _| Response::ok("Hello from Workers!"))
-        .post_async("/form/:field", |mut req, ctx| async move {
-            if let Some(name) = ctx.param("field") {
-                let form = req.form_data().await?;
-                match form.get(name) {
-                    Some(FormEntry::Field(value)) => {
-                        return Response::from_json(&json!({ name: value }))
-                    }
-                    Some(FormEntry::File(_)) => {
-                        return Response::error("`field` param in form shouldn't be a File", 422);
-                    }
-                    None => return Response::error("Bad Request", 400),
-                }
-            }
-
-            Response::error("Bad Request", 400)
-        })
+        .get("/", |_, _| Response::ok("Hello from Workers!"))
         .post_async("/add", |req, ctx| async move {
             let res = utils::handle_post_link(req, ctx);
             match res.await {

@@ -2,6 +2,7 @@ use cfg_if::cfg_if;
 use const_str;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use worker::{Request, RouteContext, Response, Secret, wasm_bindgen::JsValue, kv::{KvError, KvStore}, Url};
 use url::ParseError;
 
@@ -151,7 +152,10 @@ pub async fn handle_post_link<D>(mut req: Request, ctx: RouteContext<D>) -> Resu
         .map_err_to_err_res_with_msg("failed to create KV store put builder", 500)?;
     let _put_result = put_builder.execute().await
         .map_err_to_err_res_with_msg("failed to put into KV store", 500)?;
-    Ok(Response::ok(format!("your new url: https://yut.to/{}", slug)))
+    Ok(Response::from_json(&json!({
+        "slug": slug,
+        "url": format!("https://yut.to/{}", slug),
+    })))
 }
 
 fn check_hardcoded_slug(slug: &str) -> Option<String> {
