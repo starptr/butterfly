@@ -167,6 +167,9 @@ fn check_hardcoded_slug(slug: &str) -> Option<String> {
         "linkedin" => Some("https://linkedin.com/in/yuton/".to_owned()),
         "facebook" => Some("https://facebook.com/yuto314/".to_owned()),
         "fb" => Some("https://facebook.com/yuto314/".to_owned()),
+        "github" => Some("https://github.com/starptr".to_owned()),
+        "gh" => Some("https://github.com/starptr".to_owned()),
+        "spotify" => Some("https://open.spotify.com/user/21vim7gtsmu2rflbgkfviorbi".to_owned()),
         _ => None,
     }
 }
