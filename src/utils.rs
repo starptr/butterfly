@@ -170,6 +170,7 @@ fn check_hardcoded_slug(slug: &str) -> Option<String> {
         "github" => Some("https://github.com/starptr".to_owned()),
         "gh" => Some("https://github.com/starptr".to_owned()),
         "spotify" => Some("https://open.spotify.com/user/21vim7gtsmu2rflbgkfviorbi".to_owned()),
+        "bereal" => Some("https://bere.al/really_yuto".to_owned()),
         _ => None,
     }
 }
